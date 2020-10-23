@@ -1,0 +1,98 @@
+--- PSEUDOCODE ASSIGNMENT ---
+Define the problem:
+During library prep for Illumina sequencing, the library must be PCR amplified.
+Because PCR does not amplify all sequences uniformly, PCR duplicates in the 
+sequencing results should be taken out to prevent downstream errors in genome assembly,
+haplotype identification, gene expression, etc.
+
+
+before running the Deduper script run samtools sort first on the command line
+    - sorts by refname/chromosome then by alignment postion
+    - probably will want to use -o to output sorted file to new file
+
+
+Deduper pseudocode:
+shebang to specify python to run this script
+
+modules to import:
+    argparse
+    re
+
+def get_args():
+    ''' obtain input names/paths of input files from the command line '''
+    • add argument specifications for the input items
+    return the function
+
+•input from command line: names of files
+•expected: able to store and use the file names
+
+use argparse to store
+    path/name of file with UMI info
+    path/name of SAM file
+
+
+read in the 96 UMI sequences from STL96.txt
+    store UMIs in a set
+
+initialize variable called current_refname to hold the reference name of the current read
+
+initialize empty dictionary called temp_dict
+    • will hold relevant info for non-duplicates for each chromosome
+    • will be cleared for each new chromosome/scaffold/group etc.
+
+initialize general counter for number of reads
+initialize unknown_UMIs counter
+initialize not_duplicate counter
+initialize presumed_dupl counter
+
+open files to write to:
+    output SAM file
+    unknown UMIs file
+
+open input SAM file
+
+Read input SAM file one line at a time skipping the header lines
+    Increment general counter
+    Initialize temporary variables for UMI, bitwise flag, strand, refname, position, and CIGAR string
+    Extract and store the bitwise flag, reference name (chromosome), alignment position, and CIGAR string using regex
+    Check if the refname matches the one stored in current_refname
+        different:
+            • empty the temp_dict
+            • overwrite the global current_refname with the new one
+    Chck if the UMI in the set of UMIs?
+        False: 
+            • write to unknown UMIs file and loop back to the top to read in the next line
+            • increment unknown UMI counter
+        True:
+            Use bitwise flag to check if mapped
+                False: loop back to the top and read in next line
+                True:
+                    Use bitwise flag and store whether the read aligned to the fwd or rev strand
+                    If mapped to the foward strand:
+                        • check the START of the CIGAR string for softclipping (a number followed by S)
+                        • store whether there was softclipping
+                    If mapped to the reverse strand:
+                        • check the END of the CIGAR string for softclipping (a number followed by S)
+                        • store whether there was softclipping
+                    If there is softclipping:
+                        • subtract the number from the stored alignment position and store it back in place
+                    Check whether the UMI is in the temp_dict:
+                        NOT present:
+                            • write the read to the output SAM file
+                            • add dictionary to the temp_dict where the key is the UMI and the value is a
+                              set containing one tuple of position,strandedness
+                            • increment not_duplicate counter
+                        UMI is present:
+                            Use the UMI to look up the associated position,strandedness tuple(s) in the temp_dict
+                            and check whether the current position, strandedness combo is present:
+                                NOT in the set of tuples:
+                                    • write the read to the output SAM file
+                                    • add the position,strandedness tuple to the Value for the UMI in the temp_dict
+                                    • increment not_duplicate counter
+                                YES already in the set of tuples:
+                                    • increment presumed_dupl counter
+                                    • loop back to top and read in next line
+
+close all files!
+
+print report from counters

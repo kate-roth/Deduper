@@ -30,6 +30,36 @@ use argparse to store
     path/name of file with UMI info
     path/name of SAM file
 
+def get_strandedness(bitwise_flag):
+    '''takes the bitwise flag and returns a boolean for whether 
+    the read is aligned on the forward strand'''
+
+    if reverse compliment bit not set:
+        return True
+    else:
+        return False
+• input: 0
+• output: True
+• input: 16
+• output: False
+
+def adjust_pos(position, forward, cigar_string):
+    '''Considers strandedness and returns an adjusted position if there
+    is soft-clipping, insertions, deletions etc. denoted in the CIGAR string.
+    Returns the original position if adjustment not necessary.'''
+
+    if foward strand:
+        if soft-clipping at the beginning of the CIGAR string:
+            subtract softclipping from the position
+    else:
+        if insertions, deletions, skips or soft-clipping at the end of the CIGAR string present:
+            adjust position accordingly
+    return position
+• input: 100, True, 3S100M
+• output: 97
+• input: 100, False, 3S5D100M2S
+• output: 107
+
 
 read in the 96 UMI sequences from STL96.txt
     store UMIs in a set
@@ -64,18 +94,10 @@ Read input SAM file one line at a time skipping the header lines
             • write to unknown UMIs file and loop back to the top to read in the next line
             • increment unknown UMI counter
         True:
-            Use bitwise flag to check if mapped
-                False: loop back to the top and read in next line
+            Use bitwise flag to check if mapped:
                 True:
-                    Use bitwise flag and store whether the read aligned to the fwd or rev strand
-                    If mapped to the foward strand:
-                        • check the START of the CIGAR string for softclipping (a number followed by S)
-                        • store whether there was softclipping
-                    If mapped to the reverse strand:
-                        • check the END of the CIGAR string for softclipping (a number followed by S)
-                        • store whether there was softclipping
-                    If there is softclipping:
-                        • subtract the number from the stored alignment position and store it back in place
+                    Use get_strandedness function and store whether the read aligned to the fwd or rev strand
+                    Use adjust_pos function to adjust position if necessary
                     Check whether the UMI is in the temp_dict:
                         NOT present:
                             • write the read to the output SAM file

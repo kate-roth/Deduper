@@ -4,7 +4,7 @@ import argparse
 import re
 
 def get_args():
-    parser = argparse.ArgumentParser(description="A program to identify and remove PCR duplicates given a SAM file")
+    parser = argparse.ArgumentParser(description="A program to identify and remove PCR duplicates given a SAM file sorted by refname")
     parser.add_argument("-f", "--file", help="input SAM file", required=True, type=str)
     parser.add_argument("-u", "--umi", help="file with UMIs", required=True, type=str)
     return parser.parse_args()

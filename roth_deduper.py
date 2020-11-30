@@ -87,9 +87,9 @@ temp_dict = {}  # Example: {'CTGTTCAC': {(76814284, True), (76814287, True)}}
 # create output filenames
 split_path = re.split('/', samfile)
 split_name = re.split("\.", split_path[-1])
-unknown_filename = split_name[0] + "_deduper_unknown.sam"
-output_filename = split_name[0] + "_deduper_output.sam"
-duplicates_filename = split_name[0] + "_deduper_duplicates.sam"
+unknown_filename = split_name[0] + "_deduped_unknown.sam"
+output_filename = split_name[0] + "_deduped.sam"
+duplicates_filename = split_name[0] + "_deduped_duplicates.sam"
 
 # open files
 out_unknown = open(unknown_filename, "w")

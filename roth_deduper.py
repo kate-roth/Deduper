@@ -2,16 +2,34 @@
 
 import argparse
 import re
+import sys
+
+
+# function to convert -p string to boolean
+def str_to_bool(value):
+    '''takes a string and converts to a boolean'''
+    if value.lower() in {'false', 'f', '0', 'no', 'n'}:
+        return False
+    elif value.lower() in {'true', 't', '1', 'yes', 'y'}:
+        return True
+    raise ValueError(f'{value} is not a valid boolean value')
 
 def get_args():
-    parser = argparse.ArgumentParser(description="A program to identify and remove PCR duplicates given a SAM file sorted by refname")
-    parser.add_argument("-f", "--file", help="input SAM file", required=True, type=str)
-    parser.add_argument("-u", "--umi", help="file with UMIs", required=True, type=str)
+    parser = argparse.ArgumentParser(description="A program to identify and remove PCR duplicates from a SAM file. The SAM file must be sorted by refname.")
+    parser.add_argument("-f", "--file", help="input sorted SAM file", required=True, type=str)
+    parser.add_argument("-u", "--umi", help="file containing UMIs", required=True, type=str)
+    parser.add_argument("-p", "--paired", help="-p True for paired-end reads", type=str_to_bool, nargs='?', const=True, default=False)
     return parser.parse_args()
 
+# store args
 args = get_args()
 samfile = args.file
 umifile = args.umi
+paired = args.paired
+
+# raise error and exit script if user requests paired-end
+if paired == True:
+    sys.exit("Error: pair-end capability not implemented yet\nTerminated")
 
 # functions
 def get_strandedness(bitwise_flag):
